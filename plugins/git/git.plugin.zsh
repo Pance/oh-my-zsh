@@ -61,6 +61,4 @@ alias gds='git diff --staged'
 alias gps='git push'
 alias gpl='git pull'
 alias gs='git status'
-
 alias gm='git merge'
-alias gmom='git merge origin/master'
