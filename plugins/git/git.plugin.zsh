@@ -1,38 +1,23 @@
-# Query/use custom command for `git`.
-zstyle -s ":vcs_info:git:*:-all-" "command" _omz_git_git_cmd
-: ${_omz_git_git_cmd:=git}
-
 #
 # Functions
 #
 
-# The current branch name
-# Usage example: git pull origin $(current_branch)
-# Using '--quiet' with 'symbolic-ref' will not cause a fatal error (128) if
-# it's not a symbolic ref, but in a Git repo.
+# The name of the current branch
+# Back-compatibility wrapper for when this function was defined here in
+# the plugin, before being pulled in to core lib/git.zsh as git_current_branch()
+# to fix the core -> git plugin dependency.
 function current_branch() {
-local ref
-ref=$($_omz_git_git_cmd symbolic-ref --quiet HEAD 2> /dev/null)
-local ret=$?
-if [[ $ret != 0 ]]; then
-  [[ $ret == 128 ]] && return  # no git repo.
-  ref=$($_omz_git_git_cmd rev-parse --short HEAD 2> /dev/null) || return
-fi
-echo ${ref#refs/heads/}
+  git_current_branch
 }
-# The list of remotes
-function current_repository() {
-if ! $_omz_git_git_cmd rev-parse --is-inside-work-tree &> /dev/null; then
-  return
-fi
-echo $($_omz_git_git_cmd remote -v | cut -d':' -f 2)
-}
+
 # Pretty log messages
 function _git_log_prettily(){
 if ! [ -z $1 ]; then
   git log --pretty=$1
 fi
 }
+compdef _git _git_log_prettily=git-log
+
 # Warn if the current branch is a WIP
 function work_in_progress() {
 if $(git log -n 1 2>/dev/null | grep -q -c "\-\-wip\-\-"); then
@@ -48,10 +33,10 @@ fi
 alias g='git'
 alias ga='git add'
 alias gap='git add -p'
-alias gaa='git add --all'
 alias gb='git branch'
 alias gba='git branch -a'
 alias gc='git commit -m'
+alias gc!='git commit -v --amend'
 alias gco='git checkout'
 alias gcom='git checkout master'
 alias gcob='git checkout -b'
